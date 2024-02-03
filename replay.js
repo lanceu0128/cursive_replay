@@ -8,6 +8,12 @@ class Replay {
         this.loadJSON(filePath)
             .then(data => {
                 this.logData = data;
+                
+                // support for Cursive Recorder extension files (and outdated Curisve file formats)
+                // logData should be a list of dictionaries for this to work properly
+                if ("data" in this.logData) { this.logData = this.logData['data'] };
+                if ("payload" in this.logData) { this.logData = this.logData['payload'] };
+
                 this.startReplay();
             })
             .catch(error => console.error('Error loading JSON file:', error));
@@ -22,7 +28,8 @@ class Replay {
                 if (response.headers.get('content-length') === '0') {
                     throw new Error('Empty JSON response');
                 }
-                return response.json();
+                let response_json = response.json();
+                return response_json
             });
     }
 
@@ -41,7 +48,7 @@ class Replay {
         const processEvent = () => {
             if (index < this.logData.length) {
                 let event = this.logData[index++];
-                if (event.event === 'keyDown') { // can sometimes be keydown or keyDown
+                if (event.event.toLowerCase() === 'keydown') { // can sometimes be keydown or keyDown
                     textOutput = this.applyKey(event.key, textOutput);
                 }
                 this.outputElement.innerHTML = textOutput;
@@ -85,5 +92,3 @@ class Replay {
         }
     }
 }
-
-module.exports = Replay;
