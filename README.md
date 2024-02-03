@@ -1,6 +1,6 @@
 # Cursive Replay
 ## Introduction
-Cursive Replay allows users to verify that writing was written by a human and replay authorship. It is a simple NPM package and CDN that works with file created using Cursive Recorder.   
+Cursive Replay allows users to replay typing logs, immortalizing one's work and verifying human authorship. It is a simple NPM package and CDN that works with file created using Cursive Recorder.   
 
 ## Example Usage
 As outlined in `demo.html`, usage is as simple as calling the CDN in your HTML:
@@ -28,4 +28,4 @@ And calling the Replay class onto a specified element:
 ## About Cursive and Cursive Recorder
 Cursive is a company dedicated to proving authorship in writing through biometric authentication and typing analytics. 
 
-This CDN is designed to be used with Cursive Recorder, a chrome extension that securely tracks your typing activity across the web. Files created with Recorder are replaying using Replay.
+This CDN is designed to be used with Cursive Recorder, a chrome extension that securely tracks your typing activity across the web. Files recorded with Recorder can be replayed using Replay.
