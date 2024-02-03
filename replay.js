@@ -85,3 +85,5 @@ class Replay {
         }
     }
 }
+
+module.exports = Replay;
