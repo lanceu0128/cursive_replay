@@ -10,57 +10,10 @@
         font-family: Arial, sans-serif;
         padding: 20px;
     }
-
-    /* #output {
-        background-color: white;
-        color: black;
-        border: 1px solid #ccc;
-        padding: 20px;
-        margin: 20px; /* Added margin */
-        height: 500px; /* Increased height for better visibility */
-        overflow: auto;
-        font-family: 'Courier New', Courier, monospace; /* Monospace font for print-like appearance */
-    } */
-
-    button {
-        margin: 10px 0;
-        padding: 10px 15px;
-        background-color: #007bff;
-        color: white;
-        border: none;
-        border-radius: 4px;
-        cursor: pointer;
-        font-size: 16px;
-    }
-
-    button:hover {
-        background-color: #0056b3;
-    }
-
-    .stats {
-        margin: 10px 0;
-        padding: 10px;
-        background-color: #e9ecef;
-        border-radius: 4px;
-    }
     </style>
 </head>
 <body>
-    <h1>Cursive Replay</h1>
-    <div class="stats">
-        <strong>Document Stats:</strong><br>
-        Author Email: joseph.thibault@gmail.com<br>
-        Total minutes: 20:23<br>
-        Total Edits: 203<br>
-        Total Characters: 1690<br>
-        Last Edit: 8:14pm EST Jan 29, 2024
-    </div>
-    <div id="output">
-        start
-    </div>
-    <!-- <button onclick="skipToEnd()">View All</button> -->
-    <button">Start Replay</button>
-
+    <div id="output"></div>
     <script>
         var replay = new Replay(
             elementId='output', 

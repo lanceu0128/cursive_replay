@@ -1,7 +1,6 @@
-var replayInProgress = false;
-
 class Replay {
     constructor(elementId, filePath, speed = 1, loop = false) {
+        this.replayInProgress = false;
         this.outputElement = document.getElementById(elementId);
         this.speed = speed;
         this.loop = loop;
@@ -28,8 +27,8 @@ class Replay {
     }
 
     startReplay() {
-        if (replayInProgress) return; // prevent replay if already in progress
-        replayInProgress = true;
+        if (this.replayInProgress) return; // prevent replay if already in progress
+        this.replayInProgress = true;
         this.outputElement.innerHTML = '';
         this.replayLog();
     }
@@ -51,7 +50,7 @@ class Replay {
                 lastEventTimestamp = parseInt(event.unixTimestamp);
                 setTimeout(processEvent, timestampDifference / this.speed);
             } else {
-                replayInProgress = false;
+                this.replayInProgress = false;
                 if (this.loop) { this.startReplay(); };
             }
         }
@@ -60,7 +59,7 @@ class Replay {
     }
 
     skipToEnd() {
-        if (replayInProgress) return;
+        if (this.replayInProgress) return;
         let textOutput = "";
         logData.forEach(event => {
             if (event.event === 'keydown') {
@@ -78,12 +77,11 @@ class Replay {
                 return textOutput + "|\n";
             case "Backspace":
                 return textOutput.slice(0, -1) + "|";
-                case "ControlBackspace":
-                    let lastSpace = textOutput.lastIndexOf(' ');
-                    return textOutput.slice(0, lastSpace) + "|";
-                    default:
-                        return !["Shift", "Ctrl", "Alt", "ArrowDown", "ArrowUp", "Control", "ArrowRight", "ArrowLeft"].includes(key) ? textOutput + key + "|" : textOutput + "|";
+            case "ControlBackspace":
+                let lastSpace = textOutput.lastIndexOf(' ');
+                return textOutput.slice(0, lastSpace) + "|";
+            default:
+                return !["Shift", "Ctrl", "Alt", "ArrowDown", "ArrowUp", "Control", "ArrowRight", "ArrowLeft"].includes(key) ? textOutput + key + "|" : textOutput + "|";
         }
-        
     }
 }
