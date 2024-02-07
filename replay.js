@@ -55,7 +55,7 @@ class Replay {
 
                 const timestampDifference = parseInt(event.unixTimestamp) - lastEventTimestamp;
                 lastEventTimestamp = parseInt(event.unixTimestamp);
-                setTimeout(processEvent, timestampDifference / this.speed);
+                setTimeout(processEvent, 1 / this.speed * 100);
             } else {
                 this.replayInProgress = false;
                 if (this.loop) { this.startReplay(); };
