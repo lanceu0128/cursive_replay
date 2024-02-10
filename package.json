@@ -18,5 +18,8 @@
     "url": "https://github.com/lanceu0128/cursive_replay/issues"
   },
   "homepage": "https://github.com/lanceu0128/cursive_replay#readme",
-  "description": ""
+  "description": "",
+  "dependencies": {
+    "typescript": "^5.3.3"
+  }
 }

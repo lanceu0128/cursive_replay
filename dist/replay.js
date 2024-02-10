@@ -1,91 +1,86 @@
-var Replay = /** @class */ (function () {
-    function Replay(elementId, filePath, speed, loop) {
-        if (speed === void 0) { speed = 1; }
-        if (loop === void 0) { loop = false; }
-        var _this = this;
+class Replay {
+    constructor(elementId, filePath, speed = 1, loop = false) {
         this.replayInProgress = false;
         this.speed = speed;
         this.loop = loop;
-        var element = document.getElementById(elementId);
+        const element = document.getElementById(elementId);
         if (element) {
             this.outputElement = element;
         }
         else {
-            throw new Error("Element with id '".concat(elementId, "' not found"));
+            throw new Error(`Element with id '${elementId}' not found`);
         }
         this.loadJSON(filePath)
-            .then(function (data) {
-            _this.logData = data;
+            .then((data) => {
+            this.logData = data;
             // support for Cursive Recorder extension files (and outdated Curisve file formats)
             // logData should be a list of dictionaries for this to work properly
-            if ("data" in _this.logData) {
-                _this.logData = _this.logData['data'];
+            if ("data" in this.logData) {
+                this.logData = this.logData['data'];
             }
             ;
-            if ("payload" in _this.logData) {
-                _this.logData = _this.logData['payload'];
+            if ("payload" in this.logData) {
+                this.logData = this.logData['payload'];
             }
             ;
-            _this.startReplay();
+            this.startReplay();
         })
-            .catch(function (error) { throw new error('Error loading JSON file:', error); });
+            .catch(error => { throw new error('Error loading JSON file:', error); });
     }
-    Replay.prototype.loadJSON = function (filePath) {
+    loadJSON(filePath) {
         return fetch(filePath)
-            .then(function (response) {
+            .then(response => {
             if (!response.ok) {
                 throw new Error('Failed to fetch JSON file');
             }
             if (response.headers.get('content-length') === '0') {
                 throw new Error('Empty JSON response');
             }
-            var response_json = response.json();
+            let response_json = response.json();
             return response_json;
         });
-    };
-    Replay.prototype.startReplay = function () {
+    }
+    startReplay() {
         if (this.replayInProgress)
             return; // prevent replay if already in progress
         this.replayInProgress = true;
         this.outputElement.innerHTML = '';
         this.replayLog();
-    };
-    Replay.prototype.replayLog = function () {
-        var _this = this;
-        var textOutput = "";
-        var index = 0;
-        var processEvent = function () {
-            if (index < _this.logData.length) {
-                var event_1 = _this.logData[index++];
-                if (event_1.event.toLowerCase() === 'keydown') { // can sometimes be keydown or keyDown
-                    textOutput = _this.applyKey(event_1.key, textOutput);
+    }
+    replayLog() {
+        let textOutput = "";
+        let index = 0;
+        const processEvent = () => {
+            if (index < this.logData.length) {
+                let event = this.logData[index++];
+                if (event.event.toLowerCase() === 'keydown') { // can sometimes be keydown or keyDown
+                    textOutput = this.applyKey(event.key, textOutput);
                 }
-                _this.outputElement.innerHTML = textOutput;
-                setTimeout(processEvent, 1 / _this.speed * 100);
+                this.outputElement.innerHTML = textOutput;
+                setTimeout(processEvent, 1 / this.speed * 100);
             }
             else {
-                _this.replayInProgress = false;
-                if (_this.loop) {
-                    _this.startReplay();
+                this.replayInProgress = false;
+                if (this.loop) {
+                    this.startReplay();
                 }
                 ;
             }
         };
         processEvent();
-    };
-    Replay.prototype.skipToEnd = function () {
-        var _this = this;
+    }
+    skipToEnd() {
         if (this.replayInProgress)
             return;
-        var textOutput = "";
-        this.logData.forEach(function (event) {
+        let textOutput = "";
+        this.logData.forEach(event => {
             if (event.event === 'keydown') {
-                textOutput = _this.applyKey(event.key, textOutput);
+                textOutput = this.applyKey(event.key, textOutput);
             }
         });
         this.outputElement.innerHTML = textOutput;
-    };
-    Replay.prototype.applyKey = function (key, textOutput) {
+    }
+    applyKey(key, textOutput) {
         textOutput = textOutput.slice(0, -1);
         switch (key) {
             case "Enter":
@@ -93,11 +88,10 @@ var Replay = /** @class */ (function () {
             case "Backspace":
                 return textOutput.slice(0, -1) + "|";
             case "ControlBackspace":
-                var lastSpace = textOutput.lastIndexOf(' ');
+                let lastSpace = textOutput.lastIndexOf(' ');
                 return textOutput.slice(0, lastSpace) + "|";
             default:
                 return !["Shift", "Ctrl", "Alt", "ArrowDown", "ArrowUp", "Control", "ArrowRight", "ArrowLeft"].includes(key) ? textOutput + key + "|" : textOutput + "|";
         }
-    };
-    return Replay;
-}());
+    }
+}

@@ -1,5 +1,8 @@
 {
-    "compilerOptions": {
-      "outDir": "dist"
+    "compilerOptions": 
+    {
+        "moduleResolution": "node",
+        "target": "es2016",
+        "outDir": "dist"
     }
-  }
+}

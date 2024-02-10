@@ -21,6 +21,9 @@ jobs:
       - name: Update Version
         run: npm version patch
 
+      - name: Install Dependencies
+        run: npm install
+
       - name: Compile TypeScript
         run: npx tsc
 
