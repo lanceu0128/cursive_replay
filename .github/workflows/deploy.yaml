@@ -18,6 +18,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
+      - uses: actions/setup-node@v3
+        with:
+          node-version: '20.x'
+          registry-url: 'https://registry.npmjs.org'
+
       - name: Update Version
         run: npm version patch
 
@@ -26,10 +31,7 @@ jobs:
 
       - name: Compile TypeScript
         run: npx tsc
-
-      - name: Print NPM Token
-        run: echo ${{ secrets.NPM_TOKEN }}
-
+        
       - name: Publish to npm
         run: npm publish --access public  
         env:
