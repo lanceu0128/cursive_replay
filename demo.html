@@ -3,9 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <title>Cursive Replay</title>
-    <script src="replay.js"></script> 
-    <!-- replace with CDN link for portable usage -->
-   <style>
+    <!-- local script for testing and npm package for src -->
+    <!-- <script src="dist/replay.js"></script>  -->
+    <script src="https://unpkg.com/cursive-replay"></script>
+    <style>
     body {
         font-family: Arial, sans-serif;
         padding: 20px;
@@ -18,7 +19,7 @@
         var replay = new Replay(
             elementId='output', 
             filePath='test.json',
-            speed=1,
+            speed=10,
             loop=true
         )
     </script>

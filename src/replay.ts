@@ -1,22 +1,34 @@
 class Replay {
-    constructor(elementId, filePath, speed = 1, loop = false) {
+    replayInProgress: boolean;
+    outputElement: HTMLElement;
+    speed: number;
+    loop: boolean;
+    logData: Record<string, any>[];
+
+    constructor(elementId:string, filePath:string, speed = 1, loop = false) {
         this.replayInProgress = false;
-        this.outputElement = document.getElementById(elementId);
         this.speed = speed;
         this.loop = loop;
 
+        const element = document.getElementById(elementId);
+        if (element) {
+            this.outputElement = element;
+        } else {
+            throw new Error(`Element with id '${elementId}' not found`);
+        }
+
         this.loadJSON(filePath)
-            .then(data => {
+            .then((data:Record<string, any>[]) => {
                 this.logData = data;
-                
+
                 // support for Cursive Recorder extension files (and outdated Curisve file formats)
                 // logData should be a list of dictionaries for this to work properly
-                if ("data" in this.logData) { this.logData = this.logData['data'] };
-                if ("payload" in this.logData) { this.logData = this.logData['payload'] };
+                if ("data" in this.logData) { this.logData = this.logData['data'] as Record<string, any>[]};
+                if ("payload" in this.logData) { this.logData = this.logData['payload'] as Record<string, any>[]};
 
                 this.startReplay();
             })
-            .catch(error => console.error('Error loading JSON file:', error));
+            .catch(error =>{ throw new error('Error loading JSON file:', error)});
     }
 
     loadJSON(filePath) {
@@ -43,7 +55,6 @@ class Replay {
     replayLog() {
         let textOutput = "";
         let index = 0;
-        let lastEventTimestamp = parseInt(this.logData[0].unixTimestamp)
 
         const processEvent = () => {
             if (index < this.logData.length) {
@@ -53,8 +64,6 @@ class Replay {
                 }
                 this.outputElement.innerHTML = textOutput;
 
-                const timestampDifference = parseInt(event.unixTimestamp) - lastEventTimestamp;
-                lastEventTimestamp = parseInt(event.unixTimestamp);
                 setTimeout(processEvent, 1 / this.speed * 100);
             } else {
                 this.replayInProgress = false;
@@ -68,7 +77,7 @@ class Replay {
     skipToEnd() {
         if (this.replayInProgress) return;
         let textOutput = "";
-        logData.forEach(event => {
+        this.logData.forEach(event => {
             if (event.event === 'keydown') {
                 textOutput = this.applyKey(event.key, textOutput);
             }
@@ -76,7 +85,7 @@ class Replay {
         this.outputElement.innerHTML = textOutput;
     }
 
-    applyKey(key, textOutput) {
+    applyKey(key:string, textOutput:string) {
         textOutput = textOutput.slice(0, -1);
 
         switch (key) {
