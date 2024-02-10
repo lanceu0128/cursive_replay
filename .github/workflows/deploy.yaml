@@ -1,0 +1,25 @@
+name: Publish NPM Package
+
+on:
+  push:
+    branches:
+      - main  # Change this to your default branch if it's different
+
+jobs:
+  npm-publish:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Update Version
+        run: npm version patch
+
+      - name: Compile TypeScript
+        run: npx tsc
+
+      - name: Publish to npm
+        run: npm publish --access public  
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }}  # Make sure you have an npm token as a secret
