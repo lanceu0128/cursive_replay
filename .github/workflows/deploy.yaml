@@ -27,6 +27,9 @@ jobs:
       - name: Compile TypeScript
         run: npx tsc
 
+      - name: Print NPM Token
+      run: echo ${{ secrets.NPM_TOKEN }}
+
       - name: Publish to npm
         run: npm publish --access public  
         env:
