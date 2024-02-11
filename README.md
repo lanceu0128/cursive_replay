@@ -9,6 +9,12 @@ As outlined in `demo.html`, usage is as simple as calling the CDN in your HTML:
 <script src="https://unpkg.com/cursive-replay"></script>
 ```
 
+(OPTIONAL) To protect users from personal data leaks, you may want to use an SRI hash. This allows your browser to check if package code has not been tampered with. Learn more about SRI keys and generate one yourself through `https://www.srihash.org/`. Insert the generated key into your script as shown here:
+
+```
+<script src="https://unpkg.com/cursive-replay" integrity="sha256-key-here" crossorigin="anonymous"></script>
+```
+
 And calling the Replay class onto a specified element:
 
 ```
