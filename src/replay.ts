@@ -8,7 +8,7 @@ class Replay {
     logData: Record<string, any>[];
     replayTimeout: any;
 
-    constructor(elementId: string, controllerId = "", filePath: string, speed = 1, loop = false) {
+    constructor(elementId: string, filePath: string, speed = 1, loop = false, controllerId?: string) {
         this.replayInProgress = false;
         this.speed = speed;
         this.loop = loop;
@@ -19,31 +19,34 @@ class Replay {
         } else {
             throw new Error(`Element with id '${elementId}' not found`);
         }
-
-        if (controllerId.length > 0) {
+        
+        if (controllerId) {
+            console.log("made it here")
             this.constructController(controllerId); 
         }
-
+        
         this.loadJSON(filePath)
-            .then((data: Record<string, any>[]) => {
+        .then((data: Record<string, any>[]) => {
                 this.logData = data;
-
                 // support for Cursive Recorder extension files (and outdated Curisve file formats)
                 // logData should be a list of dictionaries for this to work properly
                 if ("data" in this.logData) { this.logData = this.logData['data'] as Record<string, any>[] };
                 if ("payload" in this.logData) { this.logData = this.logData['payload'] as Record<string, any>[] };
-
+                
                 this.startReplay();
             })
-            .catch(error => { throw new Error('Error loading JSON file.'); });
-        }
+            .catch(error => {
+                throw new Error('Error loading JSON file: ' + error.message);
+            });
 
-    private constructController(controllerId) {
+    }
+        
+    private constructController(controllerId:string) {
         const controller = document.getElementById(controllerId);
         if (controller) {
-            this.buttonElement = document.createElement('button');
-            this.buttonElement.id = 'playerButton';
-            this.buttonElement.textContent = 'Play';
+            // this.buttonElement = document.createElement('button');
+            // this.buttonElement.id = 'playerButton';
+            // this.buttonElement.textContent = 'Play';
 
             this.scrubberElement = document.createElement('input');
             this.scrubberElement.type = 'range';
@@ -56,13 +59,11 @@ class Replay {
                 this.skipToTime(scrubberValue);                
             });
 
-            // Append the button and input element as children to the parent div
-            // controller.appendChild(this.buttonElement);
             controller.appendChild(this.scrubberElement);
         }
     }
 
-    private loadJSON(filePath) {
+    private loadJSON(filePath:string) {
         return fetch(filePath)
             .then(response => {
                 if (!response.ok) {
@@ -71,8 +72,12 @@ class Replay {
                 if (response.headers.get('content-length') === '0') {
                     throw new Error('Empty JSON response');
                 }
+
                 let response_json = response.json();
                 return response_json
+            })
+            .catch(error => {
+                throw new Error('Error loading JSON file: ' + error.message);
             });
     }
 
@@ -100,8 +105,7 @@ class Replay {
                         textOutput = this.applyKey(event.key, textOutput);
                     }
                     this.outputElement.innerHTML = textOutput;
-
-                    // replayInProgress will be false here iff skipToEnd() is triggered
+                    this.scrubberElement.value = String(index / this.logData.length * 100);
                     this.replayTimeout = setTimeout(processEvent, 1 / this.speed * 100);
                 } else {
                     this.replayInProgress = false;
@@ -136,7 +140,6 @@ class Replay {
         // only go through certain % of log data
         let textOutput = "";
         const numElementsToProcess = Math.ceil(this.logData.length * percentage / 100);
-        console.log(this.logData.length, numElementsToProcess);
         for (let i = 0; i < numElementsToProcess; i++) {
             const event = this.logData[i];
             if (event.event.toLowerCase() === 'keydown') {

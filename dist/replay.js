@@ -1,5 +1,5 @@
 class Replay {
-    constructor(elementId, controllerId = "", filePath, speed = 1, loop = false) {
+    constructor(elementId, filePath, speed = 1, loop = false, controllerId) {
         this.replayInProgress = false;
         this.speed = speed;
         this.loop = loop;
@@ -10,7 +10,8 @@ class Replay {
         else {
             throw new Error(`Element with id '${elementId}' not found`);
         }
-        if (controllerId.length > 0) {
+        if (controllerId) {
+            console.log("made it here");
             this.constructController(controllerId);
         }
         this.loadJSON(filePath)
@@ -28,14 +29,16 @@ class Replay {
             ;
             this.startReplay();
         })
-            .catch(error => { throw new Error('Error loading JSON file.'); });
+            .catch(error => {
+            throw new Error('Error loading JSON file: ' + error.message);
+        });
     }
     constructController(controllerId) {
         const controller = document.getElementById(controllerId);
         if (controller) {
-            this.buttonElement = document.createElement('button');
-            this.buttonElement.id = 'playerButton';
-            this.buttonElement.textContent = 'Play';
+            // this.buttonElement = document.createElement('button');
+            // this.buttonElement.id = 'playerButton';
+            // this.buttonElement.textContent = 'Play';
             this.scrubberElement = document.createElement('input');
             this.scrubberElement.type = 'range';
             this.scrubberElement.id = 'timelineScrubber';
@@ -45,8 +48,6 @@ class Replay {
                 const scrubberValue = this.scrubberElement.value;
                 this.skipToTime(scrubberValue);
             });
-            // Append the button and input element as children to the parent div
-            // controller.appendChild(this.buttonElement);
             controller.appendChild(this.scrubberElement);
         }
     }
@@ -61,6 +62,9 @@ class Replay {
             }
             let response_json = response.json();
             return response_json;
+        })
+            .catch(error => {
+            throw new Error('Error loading JSON file: ' + error.message);
         });
     }
     // call this to make a "start" or "start over" function
@@ -86,7 +90,7 @@ class Replay {
                         textOutput = this.applyKey(event.key, textOutput);
                     }
                     this.outputElement.innerHTML = textOutput;
-                    // replayInProgress will be false here iff skipToEnd() is triggered
+                    this.scrubberElement.value = String(index / this.logData.length * 100);
                     this.replayTimeout = setTimeout(processEvent, 1 / this.speed * 100);
                 }
                 else {
@@ -121,7 +125,6 @@ class Replay {
         // only go through certain % of log data
         let textOutput = "";
         const numElementsToProcess = Math.ceil(this.logData.length * percentage / 100);
-        console.log(this.logData.length, numElementsToProcess);
         for (let i = 0; i < numElementsToProcess; i++) {
             const event = this.logData[i];
             if (event.event.toLowerCase() === 'keydown') {
