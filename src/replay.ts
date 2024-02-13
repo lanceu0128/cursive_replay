@@ -69,6 +69,7 @@ class Replay {
             });
     }
 
+    // call this to make a "start" or "start over" function
     public startReplay() {
         // clear previous instances of timeout to prevent multiple running at once
         if (this.replayInProgress) {
@@ -79,6 +80,7 @@ class Replay {
         this.replayLog();
     }
 
+    // called by startReplay() to recursively call through keydown events
     private replayLog() {
         let textOutput = "";
         let index = 0;
@@ -117,6 +119,7 @@ class Replay {
         this.outputElement.innerHTML = textOutput.slice(0, -1);
     }
 
+    // used in various places to add a keydown, backspace, etc. to the output
     private applyKey(key: string, textOutput: string) {
         textOutput = textOutput.slice(0, -1);
 
