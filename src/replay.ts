@@ -70,7 +70,7 @@ class Replay {
                     this.outputElement.innerHTML = textOutput;
 
                     // replayInProgress will be false here iff skipToEnd() is triggered
-                    this.replayTimeout = r setTimeout(processEvent, 1 / this.speed * 100);
+                    this.replayTimeout = setTimeout(processEvent, 1 / this.speed * 100);
                 } else {
                     this.replayInProgress = false;
                     if (this.loop) { this.startReplay(); };
