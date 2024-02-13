@@ -4,8 +4,9 @@ class Replay {
     speed: number;
     loop: boolean;
     logData: Record<string, any>[];
+    replayTimeout: any;
 
-    constructor(elementId:string, filePath:string, speed = 1, loop = false) {
+    constructor(elementId: string, filePath: string, speed = 1, loop = false) {
         this.replayInProgress = false;
         this.speed = speed;
         this.loop = loop;
@@ -18,17 +19,17 @@ class Replay {
         }
 
         this.loadJSON(filePath)
-            .then((data:Record<string, any>[]) => {
+            .then((data: Record<string, any>[]) => {
                 this.logData = data;
 
                 // support for Cursive Recorder extension files (and outdated Curisve file formats)
                 // logData should be a list of dictionaries for this to work properly
-                if ("data" in this.logData) { this.logData = this.logData['data'] as Record<string, any>[]};
-                if ("payload" in this.logData) { this.logData = this.logData['payload'] as Record<string, any>[]};
+                if ("data" in this.logData) { this.logData = this.logData['data'] as Record<string, any>[] };
+                if ("payload" in this.logData) { this.logData = this.logData['payload'] as Record<string, any>[] };
 
                 this.startReplay();
             })
-            .catch(error =>{ throw new error('Error loading JSON file:', error)});
+            .catch(error => { throw new error('Error loading JSON file:', error) });
     }
 
     loadJSON(filePath) {
@@ -46,7 +47,10 @@ class Replay {
     }
 
     startReplay() {
-        if (this.replayInProgress) return; // prevent replay if already in progress
+        // clear previous instances of timeout to prevent multiple running at once
+        if (this.replayInProgress) {
+            clearTimeout(this.replayTimeout);
+        };
         this.replayInProgress = true;
         this.outputElement.innerHTML = '';
         this.replayLog();
@@ -57,17 +61,20 @@ class Replay {
         let index = 0;
 
         const processEvent = () => {
-            if (index < this.logData.length) {
-                let event = this.logData[index++];
-                if (event.event.toLowerCase() === 'keydown') { // can sometimes be keydown or keyDown
-                    textOutput = this.applyKey(event.key, textOutput);
-                }
-                this.outputElement.innerHTML = textOutput;
+            if (this.replayInProgress) {
+                if (index < this.logData.length) {
+                    let event = this.logData[index++];
+                    if (event.event.toLowerCase() === 'keydown') { // can sometimes be keydown or keyDown
+                        textOutput = this.applyKey(event.key, textOutput);
+                    }
+                    this.outputElement.innerHTML = textOutput;
 
-                setTimeout(processEvent, 1 / this.speed * 100);
-            } else {
-                this.replayInProgress = false;
-                if (this.loop) { this.startReplay(); };
+                    // replayInProgress will be false here iff skipToEnd() is triggered
+                    this.replayTimeout = r setTimeout(processEvent, 1 / this.speed * 100);
+                } else {
+                    this.replayInProgress = false;
+                    if (this.loop) { this.startReplay(); };
+                }
             }
         }
 
@@ -75,17 +82,19 @@ class Replay {
     }
 
     skipToEnd() {
-        if (this.replayInProgress) return;
+        if (this.replayInProgress) {
+            this.replayInProgress = false;
+        }
         let textOutput = "";
         this.logData.forEach(event => {
-            if (event.event === 'keydown') {
+            if (event.event.toLowerCase() === 'keydown') {
                 textOutput = this.applyKey(event.key, textOutput);
             }
         });
-        this.outputElement.innerHTML = textOutput;
+        this.outputElement.innerHTML = textOutput.slice(0, -1);
     }
 
-    applyKey(key:string, textOutput:string) {
+    applyKey(key: string, textOutput: string) {
         textOutput = textOutput.slice(0, -1);
 
         switch (key) {

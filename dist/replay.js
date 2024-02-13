@@ -41,8 +41,11 @@ class Replay {
         });
     }
     startReplay() {
-        if (this.replayInProgress)
-            return; // prevent replay if already in progress
+        // clear previous instances of timeout to prevent multiple running at once
+        if (this.replayInProgress) {
+            clearTimeout(this.replayTimeout);
+        }
+        ;
         this.replayInProgress = true;
         this.outputElement.innerHTML = '';
         this.replayLog();
@@ -51,34 +54,38 @@ class Replay {
         let textOutput = "";
         let index = 0;
         const processEvent = () => {
-            if (index < this.logData.length) {
-                let event = this.logData[index++];
-                if (event.event.toLowerCase() === 'keydown') { // can sometimes be keydown or keyDown
-                    textOutput = this.applyKey(event.key, textOutput);
+            if (this.replayInProgress) {
+                if (index < this.logData.length) {
+                    let event = this.logData[index++];
+                    if (event.event.toLowerCase() === 'keydown') { // can sometimes be keydown or keyDown
+                        textOutput = this.applyKey(event.key, textOutput);
+                    }
+                    this.outputElement.innerHTML = textOutput;
+                    // replayInProgress will be false here iff skipToEnd() is triggered
+                    this.replayTimeout = setTimeout(processEvent, 1 / this.speed * 100);
                 }
-                this.outputElement.innerHTML = textOutput;
-                setTimeout(processEvent, 1 / this.speed * 100);
-            }
-            else {
-                this.replayInProgress = false;
-                if (this.loop) {
-                    this.startReplay();
+                else {
+                    this.replayInProgress = false;
+                    if (this.loop) {
+                        this.startReplay();
+                    }
+                    ;
                 }
-                ;
             }
         };
         processEvent();
     }
     skipToEnd() {
-        if (this.replayInProgress)
-            return;
+        if (this.replayInProgress) {
+            this.replayInProgress = false;
+        }
         let textOutput = "";
         this.logData.forEach(event => {
-            if (event.event === 'keydown') {
+            if (event.event.toLowerCase() === 'keydown') {
                 textOutput = this.applyKey(event.key, textOutput);
             }
         });
-        this.outputElement.innerHTML = textOutput;
+        this.outputElement.innerHTML = textOutput.slice(0, -1);
     }
     applyKey(key, textOutput) {
         textOutput = textOutput.slice(0, -1);
