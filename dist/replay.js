@@ -1,5 +1,5 @@
 class Replay {
-    constructor(elementId, controllerId, filePath, speed = 1, loop = false) {
+    constructor(elementId, filePath, speed = 1, loop = false) {
         this.replayInProgress = false;
         this.speed = speed;
         this.loop = loop;
@@ -57,6 +57,7 @@ class Replay {
             return response_json;
         });
     }
+    // call this to make a "start" or "start over" function
     startReplay() {
         // clear previous instances of timeout to prevent multiple running at once
         if (this.replayInProgress) {
@@ -67,6 +68,7 @@ class Replay {
         this.outputElement.innerHTML = '';
         this.replayLog();
     }
+    // called by startReplay() to recursively call through keydown events
     replayLog() {
         let textOutput = "";
         let index = 0;
@@ -104,6 +106,7 @@ class Replay {
         });
         this.outputElement.innerHTML = textOutput.slice(0, -1);
     }
+    // used in various places to add a keydown, backspace, etc. to the output
     applyKey(key, textOutput) {
         textOutput = textOutput.slice(0, -1);
         switch (key) {

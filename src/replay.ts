@@ -8,7 +8,7 @@ class Replay {
     logData: Record<string, any>[];
     replayTimeout: any;
 
-    constructor(elementId: string, controllerId: string, filePath: string, speed = 1, loop = false) {
+    constructor(elementId: string, filePath: string, speed = 1, loop = false) {
         this.replayInProgress = false;
         this.speed = speed;
         this.loop = loop;
