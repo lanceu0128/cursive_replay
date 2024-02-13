@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <title>Cursive Replay</title>
     <!-- local script for testing and npm package for src -->
-    <script src="dist/replay.js"></script> 
-    <!-- <script src="https://unpkg.com/cursive-replay"></script> -->
+    <!-- <script src="dist/replay.js"></script>  -->
+    <script src="https://unpkg.com/cursive-replay"></script>
     <style>
     body {
         font-family: Arial, sans-serif;
@@ -16,14 +16,18 @@
 <body>
     <button onclick="replay.skipToEnd()">View All</button>
     <button onclick="replay.startReplay()">Start Over</button>
+    
     <div id="output"></div>
+    <div id="player"></div>
+    
     <script>
         var replay = new Replay(
             elementId='output', 
             filePath='test.json',
             speed=10,
-            loop=true
+            loop=false
         )
     </script>
+    
 </body>
 </html>

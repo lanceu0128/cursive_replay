@@ -1,5 +1,5 @@
 class Replay {
-    constructor(elementId, filePath, speed = 1, loop = false) {
+    constructor(elementId, controllerId, filePath, speed = 1, loop = false) {
         this.replayInProgress = false;
         this.speed = speed;
         this.loop = loop;
@@ -10,6 +10,7 @@ class Replay {
         else {
             throw new Error(`Element with id '${elementId}' not found`);
         }
+        // this.constructController(controllerId); 
         this.loadJSON(filePath)
             .then((data) => {
             this.logData = data;
@@ -25,8 +26,24 @@ class Replay {
             ;
             this.startReplay();
         })
-            .catch(error => { throw new error('Error loading JSON file:', error); });
+            .catch(error => { throw new Error('Error loading JSON file.'); });
     }
+    // private constructController(controllerId) {
+    //     const controller = document.getElementById(controllerId);
+    //     if (controller) {
+    //         this.buttonElement = document.createElement('button');
+    //         this.buttonElement.id = 'playerButton';
+    //         this.buttonElement.textContent = 'Play';
+    //         this.scrubberElement = document.createElement('input');
+    //         this.scrubberElement.type = 'range';
+    //         this.scrubberElement.id = 'timelineScrubber';
+    //         this.scrubberElement.min = '0';
+    //         this.scrubberElement.max = '100';
+    //         // Append the button and input element as children to the parent div
+    //         controller.appendChild(this.buttonElement);
+    //         controller.appendChild(this.scrubberElement);
+    //     }
+    // }
     loadJSON(filePath) {
         return fetch(filePath)
             .then(response => {
