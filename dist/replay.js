@@ -1,5 +1,5 @@
 class Replay {
-    constructor(elementId, filePath, speed = 1, loop = false) {
+    constructor(elementId, controllerId = "", filePath, speed = 1, loop = false) {
         this.replayInProgress = false;
         this.speed = speed;
         this.loop = loop;
@@ -10,7 +10,9 @@ class Replay {
         else {
             throw new Error(`Element with id '${elementId}' not found`);
         }
-        // this.constructController(controllerId); 
+        if (controllerId.length > 0) {
+            this.constructController(controllerId);
+        }
         this.loadJSON(filePath)
             .then((data) => {
             this.logData = data;
@@ -28,22 +30,26 @@ class Replay {
         })
             .catch(error => { throw new Error('Error loading JSON file.'); });
     }
-    // private constructController(controllerId) {
-    //     const controller = document.getElementById(controllerId);
-    //     if (controller) {
-    //         this.buttonElement = document.createElement('button');
-    //         this.buttonElement.id = 'playerButton';
-    //         this.buttonElement.textContent = 'Play';
-    //         this.scrubberElement = document.createElement('input');
-    //         this.scrubberElement.type = 'range';
-    //         this.scrubberElement.id = 'timelineScrubber';
-    //         this.scrubberElement.min = '0';
-    //         this.scrubberElement.max = '100';
-    //         // Append the button and input element as children to the parent div
-    //         controller.appendChild(this.buttonElement);
-    //         controller.appendChild(this.scrubberElement);
-    //     }
-    // }
+    constructController(controllerId) {
+        const controller = document.getElementById(controllerId);
+        if (controller) {
+            this.buttonElement = document.createElement('button');
+            this.buttonElement.id = 'playerButton';
+            this.buttonElement.textContent = 'Play';
+            this.scrubberElement = document.createElement('input');
+            this.scrubberElement.type = 'range';
+            this.scrubberElement.id = 'timelineScrubber';
+            this.scrubberElement.min = '0';
+            this.scrubberElement.max = '100';
+            this.scrubberElement.addEventListener('input', () => {
+                const scrubberValue = this.scrubberElement.value;
+                this.skipToTime(scrubberValue);
+            });
+            // Append the button and input element as children to the parent div
+            // controller.appendChild(this.buttonElement);
+            controller.appendChild(this.scrubberElement);
+        }
+    }
     loadJSON(filePath) {
         return fetch(filePath)
             .then(response => {
@@ -105,6 +111,25 @@ class Replay {
             }
         });
         this.outputElement.innerHTML = textOutput.slice(0, -1);
+        this.scrubberElement.value = "100";
+    }
+    // used by the scrubber to skip to a certain percentage of data
+    skipToTime(percentage) {
+        if (this.replayInProgress) {
+            this.replayInProgress = false;
+        }
+        // only go through certain % of log data
+        let textOutput = "";
+        const numElementsToProcess = Math.ceil(this.logData.length * percentage / 100);
+        console.log(this.logData.length, numElementsToProcess);
+        for (let i = 0; i < numElementsToProcess; i++) {
+            const event = this.logData[i];
+            if (event.event.toLowerCase() === 'keydown') {
+                textOutput = this.applyKey(event.key, textOutput);
+            }
+        }
+        this.outputElement.innerHTML = textOutput.slice(0, -1);
+        this.scrubberElement.value = percentage;
     }
     // used in various places to add a keydown, backspace, etc. to the output
     applyKey(key, textOutput) {

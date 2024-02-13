@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <title>Cursive Replay</title>
     <!-- local script for testing and npm package for src -->
-    <script src="dist/replay.js"></script> 
+    <!-- <script src="dist/replay.js"></script>  -->
     <!-- <script src="https://unpkg.com/cursive-replay"></script> -->
     <style>
     body {
@@ -14,15 +14,19 @@
     </style>
 </head>
 <body>
-    <button onclick="replay.skipToEnd()">View All</button>
-    <button onclick="replay.startReplay()">Start Over</button>
+    <!-- <button onclick="replay.skipToEnd()">View All</button>
+    <button onclick="replay.startReplay()">Start Over</button> -->
+    <button onclick="replay.skipToTime(0)">⏪</button>
+    <button onclick="replay.startReplay()">▶️</button>
+    <button onclick="replay.skipToEnd()">⏩</button>
+    <div id="player"></div>
     
     <div id="output"></div>
-    <div id="player"></div>
     
     <script>
         var replay = new Replay(
             elementId='output', 
+            controllerId='player',
             filePath='test.json',
             speed=10,
             loop=false
