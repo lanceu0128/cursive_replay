@@ -158,19 +158,17 @@ class Replay {
     }
 
     // used in various places to add a keydown, backspace, etc. to the output
-    private applyKey(key: string, textOutput: string) {
-        textOutput = textOutput.slice(0, -1);
-
-        switch (key) {
+    private applyKey(key, textOutput) {
+        switch(key) {
             case "Enter":
-                return textOutput + "|\n";
+                return textOutput + "\n";
             case "Backspace":
-                return textOutput.slice(0, -1) + "|";
+                return textOutput.slice(0, -1);
             case "ControlBackspace":
                 let lastSpace = textOutput.lastIndexOf(' ');
-                return textOutput.slice(0, lastSpace) + "|";
+                return textOutput.slice(0, lastSpace);
             default:
-                return !["Shift", "Ctrl", "Alt", "ArrowDown", "ArrowUp", "Control", "ArrowRight", "ArrowLeft"].includes(key) ? textOutput + key + "|" : textOutput + "|";
+                return !["Shift", "Ctrl", "Alt", "ArrowDown","ArrowUp","Control","ArrowRight","ArrowLeft"].includes(key) ? textOutput + key : textOutput;
         }
     }
 }
