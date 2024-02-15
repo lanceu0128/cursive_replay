@@ -51,6 +51,11 @@ class Replay {
             controller.appendChild(this.scrubberElement);
         }
     }
+    setScrubberVal(value) {
+        if (this.scrubberElement) {
+            this.scrubberElement.value = String(value);
+        }
+    }
     loadJSON(filePath) {
         return fetch(filePath)
             .then(response => {
@@ -90,7 +95,7 @@ class Replay {
                         textOutput = this.applyKey(event.key, textOutput);
                     }
                     this.outputElement.innerHTML = textOutput;
-                    this.scrubberElement.value = String(index / this.logData.length * 100);
+                    this.setScrubberVal(index / this.logData.length * 100);
                     this.replayTimeout = setTimeout(processEvent, 1 / this.speed * 100);
                 }
                 else {
@@ -115,7 +120,7 @@ class Replay {
             }
         });
         this.outputElement.innerHTML = textOutput.slice(0, -1);
-        this.scrubberElement.value = "100";
+        this.setScrubberVal(100);
     }
     // used by the scrubber to skip to a certain percentage of data
     skipToTime(percentage) {
@@ -132,7 +137,7 @@ class Replay {
             }
         }
         this.outputElement.innerHTML = textOutput.slice(0, -1);
-        this.scrubberElement.value = percentage;
+        this.setScrubberVal(percentage);
     }
     // used in various places to add a keydown, backspace, etc. to the output
     applyKey(key, textOutput) {
