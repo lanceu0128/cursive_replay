@@ -168,7 +168,7 @@ class Replay {
                 let lastSpace = textOutput.lastIndexOf(' ');
                 return textOutput.slice(0, lastSpace);
             default:
-                return !["Shift", "Ctrl", "Alt", "ArrowDown","ArrowUp","Control","ArrowRight","ArrowLeft"].includes(key) ? textOutput + key : textOutput;
+                return !["Shift", "Ctrl", "Delete", "Alt", "ArrowDown","ArrowUp","Control","ArrowRight","ArrowLeft"].includes(key) ? textOutput + key : textOutput;
         }
     }
 }
