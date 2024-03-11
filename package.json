@@ -1,7 +1,7 @@
 {
   "name": "cursive-replay",
   "version": "1.1.10",
-  "main": "dist/replay.js",
+  "main": "dist/replay_bundle.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -20,6 +20,11 @@
   "homepage": "https://github.com/lanceu0128/cursive_replay#readme",
   "description": "",
   "dependencies": {
-    "typescript": "^5.3.3"
+    "jquery": "^3.7.1"
+  },
+  "devDependencies": {
+    "@types/jquery": "^3.5.29",
+    "ts-loader": "^9.5.1",
+    "typescript": "^5.4.2"
   }
 }

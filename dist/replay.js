@@ -1,4 +1,4 @@
-class Replay {
+export class Replay {
     constructor(elementId, filePath, speed = 1, loop = false, controllerId) {
         this.replayInProgress = false;
         this.speed = speed;
@@ -36,9 +36,21 @@ class Replay {
     constructController(controllerId) {
         const controller = document.getElementById(controllerId);
         if (controller) {
-            // this.buttonElement = document.createElement('button');
-            // this.buttonElement.id = 'playerButton';
-            // this.buttonElement.textContent = 'Play';
+            this.backButton = document.createElement("button");
+            this.backButton.textContent = "⏪";
+            this.backButton.onclick = () => {
+                this.skipToTime(0);
+            };
+            this.playButton = document.createElement("button");
+            this.playButton.textContent = "▶️";
+            this.playButton.onclick = () => {
+                this.startReplay();
+            };
+            this.forwardButton = document.createElement("button");
+            this.forwardButton.textContent = "⏩";
+            this.forwardButton.onclick = () => {
+                this.skipToEnd();
+            };
             this.scrubberElement = document.createElement('input');
             this.scrubberElement.type = 'range';
             this.scrubberElement.id = 'timelineScrubber';
@@ -48,6 +60,9 @@ class Replay {
                 const scrubberValue = this.scrubberElement.value;
                 this.skipToTime(scrubberValue);
             });
+            controller.appendChild(this.backButton);
+            controller.appendChild(this.playButton);
+            controller.appendChild(this.forwardButton);
             controller.appendChild(this.scrubberElement);
         }
     }

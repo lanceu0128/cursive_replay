@@ -1,8 +1,12 @@
-class Replay {
+import * as $ from 'jquery';
+export class Replay {
     replayInProgress: boolean;
-    outputElement: HTMLElement;
-    buttonElement: HTMLElement;
-    scrubberElement: HTMLInputElement;
+    outputElement: JQuery<HTMLElement>;
+    buttonElement: JQuery<HTMLElement>;
+    scrubberElement: JQuery<HTMLElement>;
+    backButton: JQuery<HTMLElement>;
+    playButton: JQuery<HTMLElement>;
+    forwardButton: JQuery<HTMLElement>;
     speed: number;
     loop: boolean;
     logData: Record<string, any>[];
@@ -13,8 +17,8 @@ class Replay {
         this.speed = speed;
         this.loop = loop;
 
-        const element = document.getElementById(elementId);
-        if (element) {
+        const element = $(`#${elementId}`);
+        if (element.length) {
             this.outputElement = element;
         } else {
             throw new Error(`Element with id '${elementId}' not found`);
@@ -26,10 +30,8 @@ class Replay {
         }
         
         this.loadJSON(filePath)
-        .then((data: Record<string, any>[]) => {
+            .then((data: Record<string, any>[]) => {
                 this.logData = data;
-                // support for Cursive Recorder extension files (and outdated Curisve file formats)
-                // logData should be a list of dictionaries for this to work properly
                 if ("data" in this.logData) { this.logData = this.logData['data'] as Record<string, any>[] };
                 if ("payload" in this.logData) { this.logData = this.logData['payload'] as Record<string, any>[] };
                 
@@ -42,63 +44,67 @@ class Replay {
     }
         
     private constructController(controllerId:string) {
-        const controller = document.getElementById(controllerId);
-        if (controller) {
-            // this.buttonElement = document.createElement('button');
-            // this.buttonElement.id = 'playerButton';
-            // this.buttonElement.textContent = 'Play';
+        const controller = $(`#${controllerId}`);
+        if (controller.length) {
+            this.backButton = $("<button>")
+                .text("⏪")
+                .click(() => {
+                    this.skipToTime(0);
+                });
 
-            this.scrubberElement = document.createElement('input');
-            this.scrubberElement.type = 'range';
-            this.scrubberElement.id = 'timelineScrubber';
-            this.scrubberElement.min = '0';
-            this.scrubberElement.max = '100';
+            this.playButton = $("<button>")
+                .text("▶️")
+                .click(() => {
+                    this.startReplay();
+                });
 
-            this.scrubberElement.addEventListener('input', () => {
-                const scrubberValue = this.scrubberElement.value;
-                this.skipToTime(scrubberValue);                
-            });
+            this.forwardButton = $("<button>")
+                .text("⏩")
+                .click(() => {
+                    this.skipToEnd();
+                });
 
-            controller.appendChild(this.scrubberElement);
+            this.scrubberElement = $("<input>")
+                .attr({
+                    type: 'range',
+                    id: 'timelineScrubber',
+                    min: '0',
+                    max: '100'
+                })
+                .on('input', () => {
+                    const scrubberValue = this.scrubberElement.val();
+                    this.skipToTime(Number(scrubberValue));                
+                });
+
+            controller.append(this.backButton, this.playButton, this.forwardButton, this.scrubberElement);
         }
-    }
+    }    
 
     private setScrubberVal(value) {
         if (this.scrubberElement) {
-            this.scrubberElement.value = String(value);
+            this.scrubberElement.val(value);
         }
     }
 
-    private loadJSON(filePath:string) {
-        return fetch(filePath)
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Failed to fetch JSON file');
-                }
-                if (response.headers.get('content-length') === '0') {
-                    throw new Error('Empty JSON response');
-                }
-
-                let response_json = response.json();
-                return response_json
-            })
-            .catch(error => {
-                throw new Error('Error loading JSON file: ' + error.message);
+    private loadJSON(filePath:string): Promise<Record<string, any>[]> {
+        return new Promise((resolve, reject) => {
+            $.getJSON(filePath, data => {
+                resolve(data);
+            }).fail((jqxhr, textStatus, error) => {
+                reject(new Error(`Error loading JSON file: ${error}`));
             });
+        });
     }
 
-    // call this to make a "start" or "start over" function
     public startReplay() {
-        // clear previous instances of timeout to prevent multiple running at once
         if (this.replayInProgress) {
             clearTimeout(this.replayTimeout);
         };
         this.replayInProgress = true;
-        this.outputElement.innerHTML = '';
+        this.outputElement.empty();
         this.replayLog();
     }
 
-    // called by startReplay() to recursively call through keydown events
     private replayLog() {
         let textOutput = "";
         let index = 0;
@@ -107,10 +113,10 @@ class Replay {
             if (this.replayInProgress) {
                 if (index < this.logData.length) {
                     let event = this.logData[index++];
-                    if (event.event.toLowerCase() === 'keydown') { // can sometimes be keydown or keyDown
+                    if (event.event.toLowerCase() === 'keydown') {
                         textOutput = this.applyKey(event.key, textOutput);
                     }
-                    this.outputElement.innerHTML = textOutput;
+                    this.outputElement.html(textOutput);
                     this.setScrubberVal(index / this.logData.length * 100)
                     this.replayTimeout = setTimeout(processEvent, 1 / this.speed * 100);
                 } else {
@@ -133,17 +139,15 @@ class Replay {
                 textOutput = this.applyKey(event.key, textOutput);
             }
         });
-        this.outputElement.innerHTML = textOutput.slice(0, -1);
+        this.outputElement.html(textOutput.slice(0, -1));
         this.setScrubberVal(100);
     }
 
-    // used by the scrubber to skip to a certain percentage of data
-    public skipToTime(percentage) {
+    public skipToTime(percentage:number) {
         if (this.replayInProgress) {
             this.replayInProgress = false;
         }
         
-        // only go through certain % of log data
         let textOutput = "";
         const numElementsToProcess = Math.ceil(this.logData.length * percentage / 100);
         for (let i = 0; i < numElementsToProcess; i++) {
@@ -153,12 +157,11 @@ class Replay {
             }
         }
         
-        this.outputElement.innerHTML = textOutput.slice(0, -1);
+        this.outputElement.html(textOutput.slice(0, -1));
         this.setScrubberVal(percentage);
     }
 
-    // used in various places to add a keydown, backspace, etc. to the output
-    private applyKey(key, textOutput) {
+    private applyKey(key:string, textOutput:string) {
         switch(key) {
             case "Enter":
                 return textOutput + "\n";

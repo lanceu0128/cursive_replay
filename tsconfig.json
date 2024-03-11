@@ -3,6 +3,7 @@
     {
         "moduleResolution": "node",
         "target": "es2016",
-        "outDir": "dist"
+        "outDir": "dist",
+        "types": ["jquery"]
     }
 }
