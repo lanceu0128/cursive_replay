@@ -55,7 +55,11 @@ export class Replay {
             this.playButton = $("<button>")
                 .text("▶️")
                 .click(() => {
-                    this.startReplay();
+                    if (this.replayInProgress) {
+                        this.skipToTime(Number(this.scrubberElement.val()));
+                    } else {
+                        this.startReplay();
+                    }
                 });
 
             this.forwardButton = $("<button>")
