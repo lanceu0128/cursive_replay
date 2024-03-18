@@ -1,21 +1,24 @@
 import * as $ from 'jquery';
 export class Replay {
-    replayInProgress: boolean;
     outputElement: JQuery<HTMLElement>;
     buttonElement: JQuery<HTMLElement>;
     scrubberElement: JQuery<HTMLElement>;
     backButton: JQuery<HTMLElement>;
     playButton: JQuery<HTMLElement>;
     forwardButton: JQuery<HTMLElement>;
+    
+    replayInProgress: boolean;
     speed: number;
     loop: boolean;
     logData: Record<string, any>[];
     replayTimeout: any;
+    ctrlPressed: boolean;
 
     constructor(elementId: string, filePath: string, speed = 1, loop = false, controllerId?: string) {
         this.replayInProgress = false;
         this.speed = speed;
         this.loop = loop;
+        this.ctrlPressed = false;
 
         const element = $(`#${elementId}`);
         if (element.length) {
@@ -117,9 +120,8 @@ export class Replay {
             if (this.replayInProgress) {
                 if (index < this.logData.length) {
                     let event = this.logData[index++];
-                    if (event.event.toLowerCase() === 'keydown') {
-                        textOutput = this.applyKey(event.key, textOutput);
-                    }
+                    textOutput = this.applyKey(event, textOutput);
+                    console.log(textOutput)
                     this.outputElement.html(textOutput);
                     this.setScrubberVal(index / this.logData.length * 100)
                     this.replayTimeout = setTimeout(processEvent, 1 / this.speed * 100);
@@ -139,9 +141,7 @@ export class Replay {
         }
         let textOutput = "";
         this.logData.forEach(event => {
-            if (event.event.toLowerCase() === 'keydown') {
-                textOutput = this.applyKey(event.key, textOutput);
-            }
+            textOutput = this.applyKey(event, textOutput);
         });
         this.outputElement.html(textOutput.slice(0, -1));
         this.setScrubberVal(100);
@@ -156,26 +156,37 @@ export class Replay {
         const numElementsToProcess = Math.ceil(this.logData.length * percentage / 100);
         for (let i = 0; i < numElementsToProcess; i++) {
             const event = this.logData[i];
-            if (event.event.toLowerCase() === 'keydown') {
-                textOutput = this.applyKey(event.key, textOutput);
-            }
+            textOutput = this.applyKey(event, textOutput);
         }
         
         this.outputElement.html(textOutput.slice(0, -1));
         this.setScrubberVal(percentage);
     }
 
-    private applyKey(key:string, textOutput:string) {
-        switch(key) {
-            case "Enter":
-                return textOutput + "\n";
-            case "Backspace":
-                return textOutput.slice(0, -1);
-            case "ControlBackspace":
-                let lastSpace = textOutput.lastIndexOf(' ');
-                return textOutput.slice(0, lastSpace);
-            default:
-                return !["Shift", "Ctrl", "Delete", "Alt", "ArrowDown","ArrowUp","Control","ArrowRight","ArrowLeft"].includes(key) ? textOutput + key : textOutput;
+    private applyKey(event:Record<string, any>, textOutput:string) {
+        const key = event["key"]
+
+        if (event.event.toLowerCase() === 'keydown') {
+            if (key === "Control") {
+                this.ctrlPressed = true; // needed for CTRL shortcuts
+            } else if (key === "Enter") {
+                textOutput += " "; // TODO: Treat 'Enter' with a paragraph break
+            } else if (key === "Backspace") {
+                if (this.ctrlPressed && textOutput.length > 0) {
+                    // If CTRL was pressed: remove last word
+                    textOutput = textOutput.trim();
+                    const last_space = textOutput.lastIndexOf(' ');
+                    textOutput = textOutput.substring(0, last_space !== -1 ? last_space + 1 : 0);
+                } else if (textOutput.length > 0) {
+                    textOutput = textOutput.slice(0, -1);
+                }
+            } else if (key.length === 1) { 
+                textOutput += key;
+            }
+        } else if (event.event === 'keyup' && key === "Control") {
+            this.ctrlPressed = false;
         }
+
+        return textOutput;
     }
 }
