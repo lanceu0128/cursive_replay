@@ -170,16 +170,23 @@ export class Replay {
             if (key === "Control") {
                 this.ctrlPressed = true; // needed for CTRL shortcuts
             } else if (key === "Enter") {
-                textOutput += " "; // TODO: Treat 'Enter' with a paragraph break
+                textOutput += "<br>";
             } else if (key === "Backspace") {
+                // If CTRL was pressed: remove last word, else: remove last character
                 if (this.ctrlPressed && textOutput.length > 0) {
-                    // If CTRL was pressed: remove last word
                     textOutput = textOutput.trim();
                     const last_space = textOutput.lastIndexOf(' ');
                     textOutput = textOutput.substring(0, last_space !== -1 ? last_space + 1 : 0);
                 } else if (textOutput.length > 0) {
                     textOutput = textOutput.slice(0, -1);
                 }
+            // shortcuts; unsure if these need to be any better. ctrl x and ctrl z could use changes to the rest of the text possibly
+            } else if (key.toLowerCase() === "v" && this.ctrlPressed) {
+                textOutput += "📋";
+            } else if (key.toLowerCase() === "z" && this.ctrlPressed) {
+                textOutput += "🔙";
+            } else if (key.toLowerCase() === "x" && this.ctrlPressed) {
+                textOutput += "✂️";
             } else if (key.length === 1) { 
                 textOutput += key;
             }
