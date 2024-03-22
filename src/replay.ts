@@ -1,4 +1,3 @@
-import { text } from '@fortawesome/fontawesome-svg-core';
 import * as $ from 'jquery';
 export class Replay {
     outputElement: JQuery<HTMLElement>;
