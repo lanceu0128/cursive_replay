@@ -1,3 +1,4 @@
+import { text } from '@fortawesome/fontawesome-svg-core';
 import * as $ from 'jquery';
 export class Replay {
     outputElement: JQuery<HTMLElement>;
@@ -172,8 +173,11 @@ export class Replay {
             } else if (key === "Enter") {
                 textOutput += "<br>";
             } else if (key === "Backspace") {
+                // If last action was Enter/paragraph break, ctrl status doesn't matter
+                if (textOutput.slice(-4) === "<br>") {
+                    textOutput = textOutput.slice(0, -4);
                 // If CTRL was pressed: remove last word, else: remove last character
-                if (this.ctrlPressed && textOutput.length > 0) {
+                } else if (this.ctrlPressed && textOutput.length > 0) {
                     textOutput = textOutput.trim();
                     const last_space = textOutput.lastIndexOf(' ');
                     textOutput = textOutput.substring(0, last_space !== -1 ? last_space + 1 : 0);
